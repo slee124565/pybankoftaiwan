@@ -3,3 +3,6 @@
 /docs/_static
 /.pydevproject
 /.project
+*.pyc
+/nbook
+/.settings
