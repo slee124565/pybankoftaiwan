@@ -11,8 +11,11 @@ __email__    = 'lee.shiueh@gmail.com'
 __url__      = 'https://github.com/slee124565/pybankoftaiwan/tree/master/bot/goldpassbook'
 __license__  = 'Apache License, Version 2.0'
 
-import urllib2
 import sys
+if sys.version_info > (3,2):
+    import urllib.request
+else:
+    import urllib
 from datetime import date, timedelta
 from lxml.html import document_fromstring
 
@@ -42,7 +45,7 @@ lang=zh-TW&whom=GB0030001000&date={Ymd}&afterOrNot={closed}&curcd={currency}'
 COL_BUYING = 3
 COL_SELLING = 4
 
-VERBOSE = True
+VERBOSE = False
     
 def get_date_price_index(target_date = date.today(), index_type = TYPE_SELLING, \
                          price_currency = CURRENCY_TWD):
@@ -55,6 +58,13 @@ def get_date_price_index(target_date = date.today(), index_type = TYPE_SELLING, 
     
     Returns:
         The price index tuple (date,open,high,low,close)
+        
+    Example::
+        
+        today,open,high,low,close = get_date_price_index(
+                                            datetime.date.today(),
+                                            TYPE_SELLING,
+                                            CURRENCY_TWD)
     """
     if (not type(target_date) is date) or (not price_currency in [CURRENCY_TWD,CURRENCY_USD]):
         raise ValueError('argument target_date should be type datetime.date')
@@ -66,7 +76,11 @@ def get_date_price_index(target_date = date.today(), index_type = TYPE_SELLING, 
     open_hour_url = RATE_URL.format(Ymd = target_date.strftime('%Y%m%d'),
                                     closed = '0',
                                     currency = price_currency)
-    html_content = urllib2.urlopen(open_hour_url).read()
+    _print_out('open_hour_url: %s' % open_hour_url)
+    if sys.version_info > (3,2):
+        html_content = urllib.request.urlopen(open_hour_url).read()
+    else:
+        html_content = urllib.urlopen(open_hour_url).read()
     html_doc = document_fromstring(html_content)
     rate_table = html_doc.xpath('/html/body/ul/li[2]/center/table[5]')
     if len(rate_table) > 0 and len(rate_table[0][0]) > 4 and len(rate_table[0]) >= 2:
@@ -79,7 +93,11 @@ def get_date_price_index(target_date = date.today(), index_type = TYPE_SELLING, 
     closed_hour_url = RATE_URL.format(Ymd = target_date.strftime('%Y%m%d'),
                                       closed = '1',
                                       currency = price_currency)
-    html_content = urllib2.urlopen(closed_hour_url).read()
+    _print_out('closed_hour_url: %s' % closed_hour_url)
+    if sys.version_info > (3,2):
+        html_content = urllib.request.urlopen(closed_hour_url).read()
+    else:
+        html_content = urllib.urlopen(closed_hour_url).read()
     html_doc = document_fromstring(html_content)
     rate_table = html_doc.xpath('/html/body/ul/li[2]/center/table[5]')
     if len(rate_table) > 0 and len(rate_table[0][0]) > 4 and len(rate_table[0]) >= 2:
@@ -88,6 +106,8 @@ def get_date_price_index(target_date = date.today(), index_type = TYPE_SELLING, 
                 rate_selling.append(float(row[COL_SELLING].text))
                 rate_buying.append(float(row[COL_BUYING].text))
             
+    _print_out('rate_selling: %s' % rate_selling)
+    _print_out('rate_buying: %s' % rate_buying)
     #-> get quote date quotation
     if len(rate_selling) > 0:
         index_selling = [target_date, rate_selling[0], max(rate_selling), 
@@ -112,16 +132,11 @@ def _print_out(text):
         sys.stdout.write(text + '\n')
 
 if __name__ == '__main__':
-    print('today price index for TWD:', get_date_price_index(index_type = 3))
-    print('today price index for USD:', get_date_price_index(index_type = 3, price_currency = CURRENCY_USD))
+    #VERBOSE = True
+    for i in range(6):
+        t_date = date.today() - timedelta(days=i)
+        print('date %s price index for TWD: %s' % (t_date, get_date_price_index(t_date,index_type = 3)))
+        print('date %s price index for USD: %s' % (t_date, get_date_price_index(t_date,index_type = 3, 
+                                                                price_currency = CURRENCY_USD)))
+        
     
-    t_date = date.today() + timedelta(days=1)
-    print('tommorrow price index for TWD:', get_date_price_index(target_date = t_date,
-                                                                 index_type = 3))
-    print('tommorrow price index for USD:', get_date_price_index(target_date= t_date,
-                                                                 index_type = 3, price_currency = CURRENCY_USD))
-    t_date = date.today() - timedelta(days=1)
-    print('yesterday price index for TWD:', get_date_price_index(target_date = t_date,
-                                                                 index_type = 3))
-    print('yesterday price index for USD:', get_date_price_index(target_date= t_date,
-                                                                 index_type = 3, price_currency = CURRENCY_USD))
