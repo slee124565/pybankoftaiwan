@@ -12,10 +12,11 @@ __url__      = 'https://github.com/slee124565/pybankoftaiwan/tree/master/bot/gol
 __license__  = 'Apache License, Version 2.0'
 
 import sys
-if sys.version_info > (3,2):
-    import urllib.request
-else:
-    import urllib
+#if sys.version_info > (3,2):
+#    import urllib.request
+#else:
+#    import urllib
+import urllib
 from datetime import date, datetime, timedelta
 from lxml.html import document_fromstring
 from time import sleep
@@ -78,10 +79,11 @@ def get_date_price_index(target_date = date.today(), index_type = TYPE_SELLING, 
                                     closed = '0',
                                     currency = price_currency)
     _print_out('open_hour_url: %s' % open_hour_url)
-    if sys.version_info > (3,2):
-        html_content = urllib.request.urlopen(open_hour_url).read()
-    else:
-        html_content = urllib.urlopen(open_hour_url).read()
+#    if sys.version_info > (3,2):
+#        html_content = urllib.request.urlopen(open_hour_url).read()
+#    else:
+#        html_content = urllib.urlopen(open_hour_url).read()
+    html_content = urllib.urlopen(open_hour_url).read()
     html_doc = document_fromstring(html_content)
     rate_table = html_doc.xpath('/html/body/ul/li[2]/center/table[5]')
     if len(rate_table) > 0 and len(rate_table[0][0]) > 4 and len(rate_table[0]) >= 2:
@@ -95,10 +97,11 @@ def get_date_price_index(target_date = date.today(), index_type = TYPE_SELLING, 
                                       closed = '1',
                                       currency = price_currency)
     _print_out('closed_hour_url: %s' % closed_hour_url)
-    if sys.version_info > (3,2):
-        html_content = urllib.request.urlopen(closed_hour_url).read()
-    else:
-        html_content = urllib.urlopen(closed_hour_url).read()
+#    if sys.version_info > (3,2):
+#        html_content = urllib.request.urlopen(closed_hour_url).read()
+#    else:
+#        html_content = urllib.urlopen(closed_hour_url).read()
+    html_content = urllib.urlopen(closed_hour_url).read()
     html_doc = document_fromstring(html_content)
     rate_table = html_doc.xpath('/html/body/ul/li[2]/center/table[5]')
     if len(rate_table) > 0 and len(rate_table[0][0]) > 4 and len(rate_table[0]) >= 2:
