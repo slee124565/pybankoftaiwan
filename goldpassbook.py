@@ -16,8 +16,9 @@ if sys.version_info > (3,2):
     import urllib.request
 else:
     import urllib
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from lxml.html import document_fromstring
+from time import sleep
 
 #####################
 ## Named constants ##
@@ -127,16 +128,51 @@ def get_date_price_index(target_date = date.today(), index_type = TYPE_SELLING, 
         return index_buying
     return (index_selling,index_buying)
 
+def save_price_index_year_history(date_before = date.today(), index_type = TYPE_SELLING, \
+                         price_currency = CURRENCY_TWD):
+    """read the year of Gold Passbook price index from BANK OF TAIWAN via internet 
+    and save to subdirectory `history` with filename format {yyyy}.json
+    
+    Args:
+        - date_before (datetime.date): read the price index before that date 
+        - index_type (int): price type; either ``TYPE_SELLING`` or ``TYPE_BUYING``
+        - price_currency (str): price currency type; either ``CURRENCY_TWD`` or ``CURRENCY_USD``
+    
+    Example::
+        
+        save_price_index_year_history(datetime.date.today(),
+                                    TYPE_SELLING,
+                                    CURRENCY_TWD)
+    """
+    index_year_history = []
+    t_date = date_before
+    t_count = 0
+    _print_out('fetch index before date %s' % date_before)
+    while t_date >= date(date_before.year,1,1):
+        date_index = get_date_price_index(t_date, index_type, price_currency)
+        if not date_index is None:
+            index_year_history.append(date_index)
+        t_count += 1
+        _print_out(date_index)
+        t_date -= timedelta(days=1)
+        sleep(datetime.now().second % 3)
+        if t_count > 14:
+            break
+    pass
+
 def _print_out(text):
     if VERBOSE:
-        sys.stdout.write(text + '\n')
+        sys.stdout.write(str(text) + '\n')
 
 if __name__ == '__main__':
-    #VERBOSE = True
+    VERBOSE = True
+    save_price_index_year_history()
+    '''
     for i in range(6):
         t_date = date.today() - timedelta(days=i)
         print('date %s price index for TWD: %s' % (t_date, get_date_price_index(t_date,index_type = 3)))
         print('date %s price index for USD: %s' % (t_date, get_date_price_index(t_date,index_type = 3, 
                                                                 price_currency = CURRENCY_USD)))
+    '''
         
     

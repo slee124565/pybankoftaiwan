@@ -3,7 +3,7 @@
 API for GoldPassbook
 =====================
 
-.. automodule:: bot.goldpassbook
+.. automodule:: goldpassbook
    :members:
    :undoc-members:
    :show-inheritance:
