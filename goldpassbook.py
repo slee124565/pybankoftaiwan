@@ -51,7 +51,7 @@ VERBOSE = False
     
 def get_date_price_index(target_date = date.today(), index_type = TYPE_SELLING, \
                          price_currency = CURRENCY_TWD):
-    """read the Gold Passbook price index from BANK OF TAIWAN via internet
+    """fetch the Gold Passbook price index from BANK OF TAIWAN website
     
     Args:
         - target_date (datetime.date): target date for the price index 
@@ -131,45 +131,44 @@ def get_date_price_index(target_date = date.today(), index_type = TYPE_SELLING, 
         return index_buying
     return (index_selling,index_buying)
 
-def save_price_index_year_history(date_before = date.today(), index_type = TYPE_SELLING, \
-                         price_currency = CURRENCY_TWD):
-    """read the year of Gold Passbook price index from BANK OF TAIWAN via internet 
-    and save to subdirectory `history` with filename format {yyyy}.json
+def get_monthly_price_index(month_date=date.today(),index_type=TYPE_SELLING,price_currency=CURRENCY_TWD):
+    """
+    Collect every working day price index in the month set by argument ``month_date`` and
+    return a list of (date,open,high,low,close)
     
     Args:
-        - date_before (datetime.date): read the price index before that date 
+        - month_date (datetime.date): any date of target month
         - index_type (int): price type; either ``TYPE_SELLING`` or ``TYPE_BUYING``
         - price_currency (str): price currency type; either ``CURRENCY_TWD`` or ``CURRENCY_USD``
-    
+
     Example::
         
         save_price_index_year_history(datetime.date.today(),
                                     TYPE_SELLING,
                                     CURRENCY_TWD)
     """
-    index_year_history = []
-    t_date = date_before
-    t_count = 0
-    _print_out('fetch index before date %s' % date_before)
-    while t_date >= date(date_before.year,1,1):
-        date_index = get_date_price_index(t_date, index_type, price_currency)
-        if not date_index is None:
-            index_year_history.append(date_index)
-        t_count += 1
-        _print_out(date_index)
-        t_date -= timedelta(days=1)
+    t_date = date(month_date.year,month_date.month,1)
+    t_list = []
+    while t_date.month == month_date.month and t_date <= date.today():
+        t_price_index = get_date_price_index(t_date, index_type, price_currency)
+        _print_out('%s price index: %s' % (t_date,str(t_price_index)))
+        if t_price_index:
+            t_list.append(t_price_index)
+        t_date += timedelta(days=1)
         sleep(datetime.now().second % 3)
-        if t_count > 14:
-            break
-    pass
+    return t_list
+
 
 def _print_out(text):
     if VERBOSE:
         sys.stdout.write(str(text) + '\n')
 
 if __name__ == '__main__':
-    VERBOSE = True
-    save_price_index_year_history()
+    month_price_list = get_monthly_price_index()
+    for entry in month_price_list:
+        print(entry)
+    
+    #save_price_index_year_history()
     '''
     for i in range(6):
         t_date = date.today() - timedelta(days=i)
