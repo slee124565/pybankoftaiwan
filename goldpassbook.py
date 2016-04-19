@@ -20,6 +20,7 @@ import urllib
 from datetime import date, datetime, timedelta
 from lxml.html import document_fromstring
 from time import sleep
+import json
 
 #####################
 ## Named constants ##
@@ -143,7 +144,7 @@ def get_monthly_price_index(month_date=date.today(),index_type=TYPE_SELLING,pric
 
     Example::
         
-        save_price_index_year_history(datetime.date.today(),
+        get_monthly_price_index(datetime.date.today(),
                                     TYPE_SELLING,
                                     CURRENCY_TWD)
     """
@@ -151,30 +152,107 @@ def get_monthly_price_index(month_date=date.today(),index_type=TYPE_SELLING,pric
     t_list = []
     while t_date.month == month_date.month and t_date <= date.today():
         t_price_index = get_date_price_index(t_date, index_type, price_currency)
-        _print_out('%s price index: %s' % (t_date,str(t_price_index)))
+        sys.stdout.write('%s price index: %s\n' % (t_date,str(t_price_index)))
         if t_price_index:
             t_list.append(t_price_index)
         t_date += timedelta(days=1)
         sleep(datetime.now().second % 3)
     return t_list
 
+def save_month_price_index(month_date=date.today(),index_type=TYPE_SELLING,price_currency=CURRENCY_TWD):
+    """
+    Collect every working day price index in the month set by argument ``month_date`` and
+    save into a file ([currenty]-[type]-[%Y%m].json) under directory `history`
+    
+    Args:
+        - month_date (datetime.date): any date of target month
+        - index_type (int): price type; either ``TYPE_SELLING`` or ``TYPE_BUYING``
+        - price_currency (str): price currency type; either ``CURRENCY_TWD`` or ``CURRENCY_USD``
+
+    Return:
+        total index count for target month
+    
+    Example::
+        
+        save_month_price_index(datetime.date.today(),
+                                    TYPE_SELLING,
+                                    CURRENCY_TWD)
+    """
+    t_data = get_monthly_price_index(month_date, index_type, price_currency)
+    t_data = [[entry[0].strftime('%Y-%m-%d')]+entry[1:] for entry in t_data]
+    t_filename = '%s-%d-%s.json' % (price_currency,index_type,month_date.strftime('%Y%m'))
+    with open('./history/%s' % t_filename, 'wb') as t_file:
+        t_file.write(json.dumps(t_data))
+    return len(t_data)
+
+def restore_history_price_index(month_date=date.today(),index_type=TYPE_SELLING,price_currency=CURRENCY_TWD):
+    """
+    Collect price index data month by month since the month set by argument ``month_date`` and
+    save into a file ([currenty]-[type]-[%Y%m].json) under directory `history`
+    
+    Args:
+        - month_date (datetime.date): any date of target month
+        - index_type (int): price type; either ``TYPE_SELLING`` or ``TYPE_BUYING``
+        - price_currency (str): price currency type; either ``CURRENCY_TWD`` or ``CURRENCY_USD``
+
+    Example::
+        
+        restore_history_price_index(datetime.date.today(),
+                                    TYPE_SELLING,
+                                    CURRENCY_TWD)
+    """
+    t_date = month_date
+    t_count = save_month_price_index(t_date, index_type, price_currency)
+    while t_count > 0:
+        sys.stdout.write('%s index count %d\n' %(t_date.strftime('%Y-%m') , t_count))
+        if t_date.month == 1:
+            t_date = date(t_date.year-1, 12, 1)
+        else:
+            t_date = date(t_date.year, t_date.month-1, 1)
+            
+        t_count = save_month_price_index(t_date, index_type, price_currency)
+    
 
 def _print_out(text):
     if VERBOSE:
         sys.stdout.write(str(text) + '\n')
 
 if __name__ == '__main__':
-    month_price_list = get_monthly_price_index()
-    for entry in month_price_list:
-        print(entry)
     
-    #save_price_index_year_history()
-    '''
-    for i in range(6):
-        t_date = date.today() - timedelta(days=i)
-        print('date %s price index for TWD: %s' % (t_date, get_date_price_index(t_date,index_type = 3)))
-        print('date %s price index for USD: %s' % (t_date, get_date_price_index(t_date,index_type = 3, 
-                                                                price_currency = CURRENCY_USD)))
-    '''
+    if True:
+        #-> test restore_history_price_index
+        sys.stdout.write('== test restore_history_price_index ==\n')
+        restore_history_price_index(date(2016,2,1))
+        sys.stdout.write('== test complete ==\n')
+        
+    if False:
+        #-> test save_month_price_index
+        sys.stdout.write('== test save_month_price_index ==\n')
+        t_date = date.today()
+        if t_date.month == 1:
+            t_date = date(t_date.year-1, 12, 1)
+        else:
+            t_date = date(t_date.year, t_date.month-1, 1)
+
+        sys.stdout.write('on %s\n' % t_date.strftime('%Y-%m'))
+        save_month_price_index(t_date)
+        sys.stdout.write('== test complete ==\n')
+
+    if False:
+        #-> test get_monthly_price_index
+        sys.stdout.write('== test get_monthly_price_index ==\n')
+        month_price_list = get_monthly_price_index()
+        for entry in month_price_list:
+            print(entry)
+        sys.stdout.write('== test complete ==\n')
+    
+    if False:
+        sys.stdout.write('== test get_date_price_index ==\n')
+        for i in range(6):
+            t_date = date.today() - timedelta(days=i)
+            print('date %s price index for TWD: %s' % (t_date, get_date_price_index(t_date,index_type = 3)))
+            print('date %s price index for USD: %s' % (t_date, get_date_price_index(t_date,index_type = 3, 
+                                                                    price_currency = CURRENCY_USD)))
+        sys.stdout.write('== test complete ==\n')
         
     
