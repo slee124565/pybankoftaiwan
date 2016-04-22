@@ -20,7 +20,7 @@ import urllib
 from datetime import date, datetime, timedelta
 from lxml.html import document_fromstring
 from time import sleep
-import json
+import json, os
 
 #####################
 ## Named constants ##
@@ -185,7 +185,7 @@ def save_month_price_index(month_date=date.today(),index_type=TYPE_SELLING,price
         t_file.write(json.dumps(t_data))
     return len(t_data)
 
-def restore_history_price_index(month_date=date.today(),index_type=TYPE_SELLING,price_currency=CURRENCY_TWD):
+def save_history_price_index(month_date=date.today(),index_type=TYPE_SELLING,price_currency=CURRENCY_TWD):
     """
     Collect price index data month by month since the month set by argument ``month_date`` and
     save into a file ([currenty]-[type]-[%Y%m].json) under directory `history`
@@ -197,7 +197,7 @@ def restore_history_price_index(month_date=date.today(),index_type=TYPE_SELLING,
 
     Example::
         
-        restore_history_price_index(datetime.date.today(),
+        save_history_price_index(datetime.date.today(),
                                     TYPE_SELLING,
                                     CURRENCY_TWD)
     """
@@ -212,6 +212,37 @@ def restore_history_price_index(month_date=date.today(),index_type=TYPE_SELLING,
             
         t_count = save_month_price_index(t_date, index_type, price_currency)
     
+def load_year_history(year_date=date.today(),index_type=TYPE_SELLING,price_currency=CURRENCY_TWD):
+    """
+    Collect price index data from self-contained history data under `history` directory 
+    for the year set by argument ``year_date`` and return a list of price index
+    
+    Args:
+        - year_date (datetime.date): any date of target year
+        - index_type (int): price type; either ``TYPE_SELLING`` or ``TYPE_BUYING``
+        - price_currency (str): price currency type; either ``CURRENCY_TWD`` or ``CURRENCY_USD``
+
+    Example::
+        
+        load_year_history(datetime.date.today(),
+                                    TYPE_SELLING,
+                                    CURRENCY_TWD)
+    """
+    t_price_list = []
+    for i in range(1,13):
+        t_date = date(year_date.year,i,1)
+        t_filename = './history/%s-%d-%s.json' % (price_currency,index_type,t_date.strftime('%Y%m'))
+        sys.stdout.write('load history file, %s\n' %(t_filename))
+        if os.path.exists(t_filename):
+            with open(t_filename, 'r') as t_file:
+                t_price_list += json.loads(t_file.read())
+        else:
+            sys.stdout.write('history file not found\n')
+            
+    t_price_list.sort(key=lambda x: x[0])
+    
+    return t_price_list
+
 
 def _print_out(text):
     if VERBOSE:
@@ -220,9 +251,17 @@ def _print_out(text):
 if __name__ == '__main__':
     
     if True:
-        #-> test restore_history_price_index
-        sys.stdout.write('== test restore_history_price_index ==\n')
-        restore_history_price_index(date(2016,2,1))
+        #-> test load_year_history
+        sys.stdout.write('== test save_history_price_index ==\n')
+        t_list = load_year_history(date(2016,2,1))
+        print(t_list)
+        sys.stdout.write('== test complete ==\n')
+        
+    
+    if False:
+        #-> test save_history_price_index
+        sys.stdout.write('== test save_history_price_index ==\n')
+        save_history_price_index(date(2016,2,1))
         sys.stdout.write('== test complete ==\n')
         
     if False:
