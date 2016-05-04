@@ -8,15 +8,10 @@ Welcome to pyBankOfTaiwan's documentation!
 
 This is a Python package provides functions to fetch web data from BANK OF TAIWAN (BOT)
 
-BOT Web Resources
-+++++++++++++++++
-
-- `Gold Passbook Rate Web Page <http://rate.bot.com.tw/Pages/UIP005/UIP005INQ4.aspx>`_.
-
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    
    readme
    apigoldpassbook
