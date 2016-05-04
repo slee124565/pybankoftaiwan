@@ -20,7 +20,7 @@ import urllib
 from datetime import date, datetime, timedelta
 from lxml.html import document_fromstring
 from time import sleep
-import json, os
+import json, os, logging
 
 #####################
 ## Named constants ##
@@ -49,6 +49,11 @@ COL_BUYING = 3
 COL_SELLING = 4
 
 VERBOSE = False
+
+HISTORY_YEAR_START = 2004
+HISTORY_YEAR_END = 2016
+
+logger = logging.getLogger(__name__)
     
 def get_date_price_index(target_date = date.today(), index_type = TYPE_SELLING, \
                          price_currency = CURRENCY_TWD):
@@ -231,7 +236,10 @@ def load_year_history(year_date=date.today(),index_type=TYPE_SELLING,price_curre
     t_price_list = []
     for i in range(1,13):
         t_date = date(year_date.year,i,1)
-        t_filename = './history/%s-%d-%s.json' % (price_currency,index_type,t_date.strftime('%Y%m'))
+        if t_date > date.today():
+            break
+        t_filename = '%s-%d-%s.json' % (price_currency,index_type,t_date.strftime('%Y%m'))
+        t_filename = os.path.join(os.path.dirname(__file__),'history',t_filename)
         sys.stdout.write('load history file, %s\n' %(t_filename))
         if os.path.exists(t_filename):
             with open(t_filename, 'r') as t_file:

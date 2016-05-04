@@ -6,7 +6,7 @@
 Welcome to pyBankOfTaiwan's documentation!
 ==========================================
 
-This is a Python package provides functions to fetch web data from bank BANK OF TAIWAN (BOT)
+This is a Python package provides functions to fetch web data from BANK OF TAIWAN (BOT)
 
 BOT Web Resources
 +++++++++++++++++
@@ -18,6 +18,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
    
+   readme
    apigoldpassbook
 
 
