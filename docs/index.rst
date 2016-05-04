@@ -11,10 +11,11 @@ This is a Python package provides functions to fetch web data from BANK OF TAIWA
 Contents:
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    
    readme
    apigoldpassbook
+   dependencies
 
 
 
