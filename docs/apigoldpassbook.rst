@@ -1,3 +1,4 @@
+.. _apigoldpassbook:
 
 ====================
 API for GoldPassbook
