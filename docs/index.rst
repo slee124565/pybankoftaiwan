@@ -15,6 +15,8 @@ Contents:
    
    readme
    usage
+   hostongae
+   djangoviews
    apigoldpassbook
    dependencies
 

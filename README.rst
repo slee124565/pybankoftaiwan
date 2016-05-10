@@ -33,4 +33,3 @@ Features
 - save monthly BOT Gold Passbook price index into a file in sub-directory `history`.
 - save all BOT Gold Passbook history price index into monthly files in sub-directory `history`.
 - get year of BOT Gold Passbook price index list from saved history files.
-
