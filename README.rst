@@ -23,7 +23,9 @@ Module GoldPassbook
 Purpose
 -------
 
-`goldpassbook` module is designed for fetch and parse BOT Gold Passbook HTML page data and return easy to use data for information system to integrate with.
+`goldpassbook` module is designed to fetch and parse BOT Gold Passbook HTML page data 
+and provide easy to use JSON data by HTTP API with which other information system could
+integrate.
 
 Issues to Solve
 ---------------

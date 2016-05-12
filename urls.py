@@ -13,6 +13,7 @@ urlpatterns = patterns('',
     url(r'gae/db_clean/$', views.gold_passbook_clean_view, name='datastore_clean'),
     url(r'gae/db_upate_task/$', views.httphandler_daily_update_chain_task, name='datastore_update_task'),
     url(r'gae/db_update_by_date/(?P<p_date_str>[-\w]+)/$', views.gold_passbook_update_by_date, name='datastore_update_by_date'),
+    url(r'gae/task_add_update/$', views.gold_passbook_add_update_task, name='passbook_upate_task_add'),
     
     
 )

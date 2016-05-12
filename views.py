@@ -5,8 +5,19 @@ from django.core.urlresolvers import reverse
 import goldpassbook, httplib, os
 from datetime import date, datetime
 
-from models_gae import GoldPassbookModel, GoldPassbookMetaModel
+from models_gae import GoldPassbookModel, GoldPassbookMetaModel, add_passbook_update_task
 
+def gold_passbook_add_update_task(request, p_index_type = goldpassbook.TYPE_SELLING, 
+                               p_currency = goldpassbook.CURRENCY_TWD):
+    """Handle Gold Passbook add update task in queue HTTP request"""
+    
+    if add_passbook_update_task(reverse('datastore_update_task')):
+        return HttpResponse('Add Gold Passbook Update Task Success!')
+    else:
+        return HttpResponse('Add Gold Passbook Update Task Fail!')
+    
+    
+    
 def gold_passbook_update_by_date(request, p_date_str,
                                p_index_type = goldpassbook.TYPE_SELLING, 
                                p_currency = goldpassbook.CURRENCY_TWD):

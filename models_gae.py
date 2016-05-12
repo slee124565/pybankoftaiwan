@@ -10,6 +10,25 @@ logger = logging.getLogger(__name__)
 
 UPDATE_TASK_COUNTDOWN = 5
 
+def add_passbook_update_task(p_update_task_url, p_index_type = gpbk.TYPE_SELLING, 
+                               p_currency = gpbk.CURRENCY_TWD):
+    """To add a task in GAE taskqueue for update Passbook datastore"""
+    
+    queue_name = '%s-%s-%s' % ( 'passbook', p_currency, p_index_type )
+    
+    try:
+        taskqueue.Queue(queue_name).purge()
+        taskqueue.add(method = 'GET',
+                  queue_name = queue_name,
+                  url = p_update_task_url,
+                  countdown = UPDATE_TASK_COUNTDOWN
+              )
+        logger.info('add passbook update task')
+        return True
+    except:
+        logger.error('add passbook update task fail', exc_info = True)
+        return False
+    
 class GoldPassbookMetaModel(db.Model):
     """datastore module to log the last date for model `GoldPassbookModel`
     it keeps.
@@ -132,14 +151,16 @@ class GoldPassbookModel(db.Model):
     @classmethod
     def clean_datastore(cls, p_index_type = gpbk.TYPE_SELLING, p_currency = gpbk.CURRENCY_TWD):
         
-        logger.info('remove GoldPassbookModel for index_type %d and currency%s.' % (p_index_type,
-                                                                                    p_currency))
         t_keyname = GoldPassbookMetaModel.get_model_key_name(p_index_type, p_currency)
         t_ancestor = GoldPassbookMetaModel.get_or_insert(t_keyname)
         t_entities = cls.all().ancestor(t_ancestor)
-        logger.info('remove %d entities for GoldPassbookModel with index_type %d and currency%s.' \
+        logger.info('remove %d entities for GoldPassbookModel with index_type %d and currency %s.' \
                     % (t_entities.count(), p_index_type, p_currency))
         db.delete(t_entities)
+        
+        t_keyname = GoldPassbookMetaModel.get_model_key_name(p_index_type, p_currency)
+        t_meta = GoldPassbookMetaModel.get_by_key_name(t_keyname)
+        db.delete(t_meta)
     
     @classmethod
     def init_datastore(cls, p_update_task_url, p_index_type = gpbk.TYPE_SELLING, 
@@ -184,14 +205,9 @@ class GoldPassbookModel(db.Model):
         t_model.put()
         logger.debug('init_datastore with date_start: %s , date_end: %s' % (str(t_date_start),
                                                                             str(t_date_end)))
-        #-> setup next task if next day is not today
-        t_next_date = t_date_end + timedelta(days=1)
-        if t_next_date < date.today():
-            taskqueue.add(method = 'GET', 
-                  url = p_update_task_url,
-                  countdown = UPDATE_TASK_COUNTDOWN)
-            logger.info('chain update task is setup')
-        
+        #-> activate datastore upate process
+        cls.daily_update_chain_task(p_update_task_url, p_index_type, p_currency)
+
         logger.debug('== init_datastore end ==')
     
     @classmethod
@@ -246,10 +262,7 @@ class GoldPassbookModel(db.Model):
         #-> setup next task if next day is not today
         t_next_date = t_target_date + timedelta(days=1)
         if t_next_date < date.today():
-            taskqueue.add(method = 'GET', 
-                  url = p_update_task_url,
-                  countdown = UPDATE_TASK_COUNTDOWN)
-        
+            add_passbook_update_task(p_update_task_url,p_index_type,p_currency)
              
         logger.debug('== daily_update_chain_task end ==')
         return True
