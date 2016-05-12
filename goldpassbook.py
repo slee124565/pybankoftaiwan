@@ -84,7 +84,7 @@ def get_date_price_index(target_date = date.today(), index_type = TYPE_SELLING, 
     open_hour_url = RATE_URL.format(Ymd = target_date.strftime('%Y%m%d'),
                                     closed = '0',
                                     currency = price_currency)
-    _print_out('open_hour_url: %s' % open_hour_url)
+    logger.debug('open_hour_url: %s' % open_hour_url)
 #    if sys.version_info > (3,2):
 #        html_content = urllib.request.urlopen(open_hour_url).read()
 #    else:
@@ -102,7 +102,7 @@ def get_date_price_index(target_date = date.today(), index_type = TYPE_SELLING, 
     closed_hour_url = RATE_URL.format(Ymd = target_date.strftime('%Y%m%d'),
                                       closed = '1',
                                       currency = price_currency)
-    _print_out('closed_hour_url: %s' % closed_hour_url)
+    logger.debug('closed_hour_url: %s' % closed_hour_url)
 #    if sys.version_info > (3,2):
 #        html_content = urllib.request.urlopen(closed_hour_url).read()
 #    else:
@@ -116,8 +116,8 @@ def get_date_price_index(target_date = date.today(), index_type = TYPE_SELLING, 
                 rate_selling.append(float(row[COL_SELLING].text))
                 rate_buying.append(float(row[COL_BUYING].text))
             
-    _print_out('rate_selling: %s' % rate_selling)
-    _print_out('rate_buying: %s' % rate_buying)
+    logger.debug('rate_selling: %s' % rate_selling)
+    logger.debug('rate_buying: %s' % rate_buying)
     #-> get quote date quotation
     if len(rate_selling) > 0:
         index_selling = [target_date, rate_selling[0], max(rate_selling), 
@@ -251,10 +251,6 @@ def load_year_history(year_date=date.today(),index_type=TYPE_SELLING,price_curre
     
     return t_price_list
 
-
-def _print_out(text):
-    if VERBOSE:
-        sys.stdout.write(str(text) + '\n')
 
 if __name__ == '__main__':
     

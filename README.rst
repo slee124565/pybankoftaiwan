@@ -25,6 +25,16 @@ Purpose
 
 `goldpassbook` module is designed for fetch and parse BOT Gold Passbook HTML page data and return easy to use data for information system to integrate with.
 
+Issues to Solve
+---------------
+
+- there are history data files need to be initialized.
+- the history data files are not up-to-date.
+- there is new data every working day.
+- the data will vary if today is working day
+- Internet connection or remote BOT server problem will cause exception during the data fetching
+- data available only for working day; sometimes weekend will be working day
+
 Features
 --------
 
@@ -33,3 +43,4 @@ Features
 - save monthly BOT Gold Passbook price index into a file in sub-directory `history`.
 - save all BOT Gold Passbook history price index into monthly files in sub-directory `history`.
 - get year of BOT Gold Passbook price index list from saved history files.
+- provide a candlestick chart
